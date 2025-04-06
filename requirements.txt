@@ -1,0 +1,15 @@
+flask==2.3.3
+flask-login==0.6.2
+flask-mongoengine==1.0.0
+langchain==0.1.0
+langchain-groq==0.0.5
+groq==0.4.1
+python-dotenv==1.0.0
+requests==2.31.0
+plotly==5.17.0
+pandas==2.1.0
+watchdog==3.0.0
+gunicorn==21.2.0
+bcrypt==4.0.1
+click==8.1.7
+colorama==0.4.6

@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env/
+.venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Flask
+instance/
+.webassets-cache
+flask_session/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Local development files
+.env
+.env.local
+.env.*.local
+
+# MongoDB
+/data/db/
+mongod.log
+
+# Project specific
+smartsocial.log
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# System Files
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+*.temp
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Generated files
+/static/generated/
+/media/
+/uploads/
+
+# Sensitive Information
+*.pem
+*.key
+*.crt
+secrets.json
+config.local.py

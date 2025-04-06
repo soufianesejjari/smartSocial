@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Content Strategies</h2>
+        <a href="{{ url_for('strategy.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New Strategy
+        </a>
+    </div>
+
+    {% if strategies %}
+        <div class="row">
+            {% for strategy in strategies %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ strategy.name }}</h5>
+                        {% if strategy.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">{{ strategy.description }}</p>
+                        <hr>
+                        <div class="mb-3">
+                            <strong>Business Type:</strong> {{ strategy.business_type }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Target Audience:</strong>
+                            {% for audience in strategy.target_audience %}
+                                <span class="badge bg-info me-1">{{ audience }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Tone of Voice:</strong> {{ strategy.tone_of_voice }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Key Topics:</strong>
+                            {% for topic in strategy.key_topics %}
+                                <span class="badge bg-secondary me-1">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        {% if not strategy.is_active %}
+                        <button class="btn btn-outline-primary btn-sm activate-strategy" 
+                                data-strategy-id="{{ strategy.id }}">
+                            Set as Active
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-outline-danger btn-sm float-end">Delete</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>No content strategies found. Create your first strategy to start managing your social media content effectively!</p>
+            <a href="{{ url_for('strategy.create') }}" class="btn btn-primary mt-2">
+                Create Your First Strategy
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const activateButtons = document.querySelectorAll('.activate-strategy');
+    
+    activateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const strategyId = this.getAttribute('data-strategy-id');
+            
+            fetch(`/strategy/${strategyId}/activate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error activating strategy: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error activating strategy');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

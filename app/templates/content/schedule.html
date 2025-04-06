@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Scheduled Posts</div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Content</th>
+                    <th>Scheduled Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td>{{ post.content[:100] }}...</td>
+                    <td>{{ post.scheduled_time }}</td>
+                    <td><span class="badge bg-{{ 'success' if post.status == 'published' else 'warning' }}">
+                        {{ post.status }}
+                    </span></td>
+                    <td>
+                        {% if post.status == 'pending' %}
+                        <button class="btn btn-sm btn-danger" 
+                                onclick="cancelPost('{{ post.id }}')">Cancel</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

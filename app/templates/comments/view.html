@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Comments</div>
+            <div class="card-body">
+                {% for comment in comments %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="card-text">{{ comment.message }}</p>
+                        <small class="text-muted">By: {{ comment.from.name }}</small>
+                        <span class="badge bg-{{ 'success' if comment.sentiment.sentiment == 'positive' else 'danger' }} float-end">
+                            {{ comment.sentiment.sentiment }}
+                        </span>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="showReplyForm('{{ comment.id }}')">Reply</button>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="generateAutoReply('{{ comment.id }}')">Auto Reply</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Page Profile Settings</span>
+                <a href="{{ url_for('settings.auto_reply_settings') }}" class="btn btn-sm btn-outline-primary">Auto-Reply Settings</a>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="page_name" class="form-label">Page Name</label>
+                        <input type="text" class="form-control" id="page_name" name="page_name" 
+                               value="{{ profile.page_name if profile else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="page_id" class="form-label">Page ID</label>
+                        <input type="text" class="form-control" id="page_id" name="page_id" 
+                               value="{{ profile.page_id if profile else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" 
+                               value="{{ profile.category if profile else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="target_audience" class="form-label">Target Audience</label>
+                        <input type="text" class="form-control" id="target_audience" name="target_audience" 
+                               value="{{ profile.target_audience if profile else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content_language" class="form-label">Content Language</label>
+                        <select class="form-control" id="content_language" name="content_language">
+                            <option value="en" {% if profile and profile.content_language == 'en' %}selected{% endif %}>English</option>
+                            <option value="es" {% if profile and profile.content_language == 'es' %}selected{% endif %}>Spanish</option>
+                            <option value="fr" {% if profile and profile.content_language == 'fr' %}selected{% endif %}>French</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

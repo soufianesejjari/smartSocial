@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Auto-Reply Settings</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="enabled" name="enabled" 
+                               {% if settings.enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="enabled">Enable Automatic Replies</label>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Reply To</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="reply_to_all" name="reply_to_all" 
+                                       {% if settings.reply_to_all %}checked{% endif %}>
+                                <label class="form-check-label" for="reply_to_all">
+                                    Reply to all comments
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="reply_to_negative" name="reply_to_negative" 
+                                       {% if settings.reply_to_negative %}checked{% endif %}>
+                                <label class="form-check-label" for="reply_to_negative">
+                                    Reply only to negative comments
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reply_template" class="form-label">Default Reply Template (Leave empty for AI-generated responses)</label>
+                        <textarea class="form-control" id="reply_template" name="reply_template" rows="4">{{ settings.reply_template }}</textarea>
+                        <div class="form-text">
+                            If provided, this template will be used instead of AI-generated responses.
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

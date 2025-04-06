@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Create New Post</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Post Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required>{{ suggestion }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="schedule_time" class="form-label">Schedule Time (optional)</label>
+                        <input type="datetime-local" class="form-control" id="schedule_time" name="schedule_time">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Content Suggestions</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control mb-2" id="topic" placeholder="Enter topic (e.g., summer sale, new product)" value="{{ topic }}">
+                    <button class="btn btn-outline-primary w-100" onclick="getSuggestion()">Generate Suggestion</button>
+                </div>
+                <div id="suggestion-result" class="mt-3"></div>
+                <div id="suggestion-loading" class="text-center d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating suggestion...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getSuggestion() {
+    const topic = document.getElementById('topic').value;
+    if (!topic) {
+        alert('Please enter a topic');
+        return;
+    }
+    
+    // Show loading indicator
+    document.getElementById('suggestion-loading').classList.remove('d-none');
+    document.getElementById('suggestion-result').innerHTML = '';
+    
+    fetch('/content/suggest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic: topic })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hide loading indicator
+        document.getElementById('suggestion-loading').classList.add('d-none');
+        
+        if (data.suggestion) {
+            const suggestionHtml = `
+                <div class="alert alert-success">
+                    <p>${data.suggestion.replace(/\n/g, '<br>')}</p>
+                    <button class="btn btn-sm btn-success mt-2" onclick="useThisSuggestion()">Use This</button>
+                </div>
+            `;
+            document.getElementById('suggestion-result').innerHTML = suggestionHtml;
+        } else {
+            document.getElementById('suggestion-result').innerHTML = '<div class="alert alert-danger">Failed to generate suggestion</div>';
+        }
+    })
+    .catch(error => {
+        document.getElementById('suggestion-loading').classList.add('d-none');
+        document.getElementById('suggestion-result').innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    });
+}
+
+function useThisSuggestion() {
+    const suggestion = document.querySelector('#suggestion-result p').innerText;
+    document.getElementById('content').value = suggestion;
+}
+</script>
+{% endblock %}

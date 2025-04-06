@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <!-- Active Strategy Card -->
+        <div class="card mb-4 {% if active_strategy %}border-success{% else %}border-warning{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
+                <span class="d-flex align-items-center">
+                    {% if active_strategy %}
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    {% else %}
+                    <i class="fas fa-exclamation-circle text-warning me-2"></i>
+                    {% endif %}
+                    <strong>Active Strategy</strong>
+                </span>
+                <a href="{{ url_for('strategy.index') }}" class="btn btn-sm btn-outline-primary">
+                    Manage
+                </a>
+            </div>
+            <div class="card-body">
+                {% if active_strategy %}
+                    <h5>{{ active_strategy.name }}</h5>
+                    <p class="text-muted mb-2">{{ active_strategy.description }}</p>
+                    <div class="strategy-details">
+                        <small class="text-muted d-block mb-1">
+                            <i class="fas fa-bullhorn me-1"></i> Tone: {{ active_strategy.tone_of_voice }}
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-building me-1"></i> Type: {{ active_strategy.business_type }}
+                        </small>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-lightbulb text-warning mb-3" style="font-size: 2rem;"></i>
+                        <p class="mb-3">No active strategy. Create one to optimize your content.</p>
+                        <a href="{{ url_for('strategy.create') }}" class="btn btn-primary btn-sm">
+                            Create Strategy
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Statistics</div>
+            <div class="card-body">
+                <h5>Posts: {{ stats.total_posts }}</h5>
+                <h5>Comments: {{ stats.total_comments }}</h5>
+                <hr>
+                <h6>Sentiment Analysis:</h6>
+                <ul>
+                    <li>Positive: {{ stats.sentiment_summary.positive }}</li>
+                    <li>Negative: {{ stats.sentiment_summary.negative }}</li>
+                    <li>Neutral: {{ stats.sentiment_summary.neutral }}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- AI Activity Summary Section -->
+        <div class="card mb-4">
+            <div class="card-header">Activity Insights</div>
+            <div class="card-body">
+                <p><i class="fas fa-robot mr-2"></i> <em>{{ activity_summary }}</em></p>
+            </div>
+        </div>
+        
+        <!-- Audience Feedback Summary Section -->
+        <div class="card mb-4">
+            <div class="card-header">Audience Topics</div>
+            <div class="card-body">
+                <p>{{ feedback_summary.summary }}</p>
+                
+                {% if feedback_summary.topics %}
+                <h6 class="mt-3">Common Topics:</h6>
+                <ul class="list-group">
+                    {% for topic in feedback_summary.topics %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ topic.name }}
+                        <span class="badge 
+                            {% if topic.sentiment == 'positive' %}bg-success
+                            {% elif topic.sentiment == 'negative' %}bg-danger
+                            {% else %}bg-secondary{% endif %} rounded-pill">
+                            {{ topic.sentiment }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- New Post Suggestions Section -->
+        <div class="card mb-4">
+            <div class="card-header">Post Suggestions</div>
+            <div class="card-body">
+                {% for suggestion in post_suggestions %}
+                <div class="suggestion-item mb-3">
+                    <p><strong>{{ suggestion.message }}</strong></p>
+                    <p class="text-muted small">{{ suggestion.reason }}</p>
+                    <button class="btn btn-sm btn-outline-primary use-suggestion" 
+                            data-message="{{ suggestion.message }}">
+                        Use This Post
+                    </button>
+                </div>
+                {% if not loop.last %}<hr>{% endif %} 
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <!-- Dynamic Post Creation Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent">
+                <i class="fas fa-pencil-alt me-2"></i> Create New Post
+            </div>
+            <div class="card-body">
+                <form id="quickPostForm" class="mb-0">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="postMessage" rows="3" 
+                                placeholder="What would you like to share?"></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recent Comments with Dynamic Replies -->
+        <div class="card mb-4">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-comments me-2"></i> Recent Comments</span>
+                <span class="badge bg-primary">{{ recent_comments.data|length }}</span>
+            </div>
+            <div class="card-body" id="commentsContainer">
+                {% for comment in recent_comments.data %}
+                <div class="comment-card mb-3" id="comment-{{ comment.id }}">
+                    <div class="d-flex mb-2">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-placeholder">
+                                {{ comment.from.name[:1] }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-0">{{ comment.from.name }}</h6>
+                                <small class="text-muted">{{ comment.created_time|timeago }}</small>
+                            </div>
+                            <p class="mb-1">{{ comment.message }}</p>
+                            <small class="text-muted d-block mb-2">On post: {{ comment.post_message }}</small>
+                            
+                            <!-- Reply Section -->
+                            <div class="reply-section">
+                                <form class="quick-reply-form" onsubmit="return handleQuickReply(event, '{{ comment.id }}')">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" name="reply_message" 
+                                               placeholder="Type a quick reply...">
+                                        <button class="btn btn-outline-primary" type="submit">Reply</button>
+                                    </div>
+                                </form>
+                                
+                                <!-- Suggested Replies -->
+                                <div class="suggested-replies mt-2" style="display: none;">
+                                    <small class="text-muted d-block mb-1">Suggested replies:</small>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for suggestion in comment.suggested_replies %}
+                                        <button class="btn btn-sm btn-light suggested-reply" 
+                                                onclick="useSuggestedReply('{{ comment.id }}', this.textContent)">
+                                            {{ suggestion }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Recent Posts</div>
+            <div class="card-body">
+                {% for post in posts.data %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="card-text">{{ post.message }}</p>
+                        <small class="text-muted">Posted: {{ post.created_time }}</small>
+                        <a href="{{ url_for('comments.list_comments', post_id=post.id) }}" 
+                           class="btn btn-sm btn-outline-primary float-end">
+                            View Comments ({{ post.comments|length }})
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quick Post Form Handler
+    document.getElementById('quickPostForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = document.getElementById('postMessage').value;
+        
+        createPost(message).then(response => {
+            if (response.success) {
+                showToast('Post created successfully!', 'success');
+                document.getElementById('postMessage').value = '';
+                // Refresh posts section
+                refreshRecentPosts();
+            }
+        });
+    });
+});
+
+async function handleQuickReply(event, commentId) {
+    event.preventDefault();
+    const form = event.target;
+    const input = form.querySelector('input[name="reply_message"]');
+    const message = input.value;
+    
+    try {
+        const response = await fetch('/comments/api/reply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                comment_id: commentId,
+                message: message
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // Add reply to UI immediately
+            addReplyToComment(commentId, message);
+            input.value = '';
+            showToast('Reply sent successfully!', 'success');
+        } else {
+            showToast('Error sending reply', 'error');
+        }
+    } catch (error) {
+        showToast('Error sending reply', 'error');
+    }
+    
+    return false;
+}
+
+function addReplyToComment(commentId, message) {
+    const commentEl = document.getElementById(`comment-${commentId}`);
+    const replyEl = document.createElement('div');
+    replyEl.className = 'reply-message ms-4 mt-2 p-2 bg-light rounded';
+    replyEl.innerHTML = `
+        <small class="text-muted">Your reply:</small>
+        <p class="mb-0">${message}</p>
+    `;
+    commentEl.appendChild(replyEl);
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+async function refreshRecentPosts() {
+    const response = await fetch('/api/posts/recent');
+    const data = await response.json();
+    // Update posts section with new data
+    // Implementation depends on your posts display structure
+}
+</script>
+
+<style>
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.comment-card {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+}
+
+.comment-card:last-child {
+    border-bottom: none;
+}
+
+.suggested-reply {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.5rem;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.suggested-reply:hover {
+    background-color: #e9ecef;
+}
+
+.strategy-details {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}

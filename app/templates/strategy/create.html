@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Create New Content Strategy</h2>
+    <form method="POST" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Strategy Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="business_type" class="form-label">Business Type</label>
+                    <select class="form-select" id="business_type" name="business_type" required>
+                        <option value="SaaS">SaaS</option>
+                        <option value="E-commerce">E-commerce</option>
+                        <option value="Service">Service</option>
+                        <option value="B2B">B2B</option>
+                        <option value="B2C">B2C</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Target Audience</label>
+                    <input type="text" class="form-control mb-2" name="target_audience" placeholder="Add target audience segment">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addField('target_audience')">
+                        Add Another Segment
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Key Objectives</label>
+                    <input type="text" class="form-control mb-2" name="key_objectives" placeholder="Add objective">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addField('key_objectives')">
+                        Add Another Objective
+                    </button>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="tone_of_voice" class="form-label">Tone of Voice</label>
+                    <select class="form-select" id="tone_of_voice" name="tone_of_voice" required>
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="technical">Technical</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="authoritative">Authoritative</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Value Propositions</label>
+                    <input type="text" class="form-control mb-2" name="value_propositions" placeholder="Add value proposition">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addField('value_propositions')">
+                        Add Another Value Prop
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+            <label class="form-check-label" for="is_active">
+                Set as Active Strategy
+            </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Create Strategy</button>
+    </form>
+</div>
+
+<script>
+function addField(fieldName) {
+    const container = document.querySelector(`input[name="${fieldName}"]`).parentElement;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = fieldName;
+    input.className = 'form-control mb-2';
+    input.placeholder = `Add another ${fieldName.replace('_', ' ')}`;
+    container.insertBefore(input, container.lastElementChild);
+}
+</script>
+{% endblock %}

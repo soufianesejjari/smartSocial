@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Post Comments</span>
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline-primary">Back to Dashboard</a>
+            </div>
+            <div class="card-body">
+                {% if comments %}
+                    {% for comment in comments %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">By: {{ comment.get('from', {}).get('name', 'Unknown') }}</small>
+                                <span class="badge bg-{{ 'success' if comment.sentiment.sentiment == 'positive' else 'danger' }}">
+                                    {{ comment.sentiment.sentiment }}
+                                </span>
+                            </div>
+                            <p class="card-text mt-2">{{ comment.message }}</p>
+                            <div class="mt-2">
+                                <div class="reply-form-{{ comment.id }} d-none">
+                                    <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+                                    <button class="btn btn-sm btn-primary" onclick="submitReply('{{ comment.id }}')">Send Reply</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="hideReplyForm('{{ comment.id }}')">Cancel</button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showReplyForm('{{ comment.id }}')">Reply</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="generateAutoReply('{{ comment.id }}', '{{ comment.message|e }}')">Auto Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No comments found for this post.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showReplyForm(commentId) {
+    document.querySelector(`.reply-form-${commentId}`).classList.remove('d-none');
+}
+
+function hideReplyForm(commentId) {
+    document.querySelector(`.reply-form-${commentId}`).classList.add('d-none');
+}
+
+function submitReply(commentId) {
+    const replyText = document.querySelector(`.reply-form-${commentId} textarea`).value;
+    fetch(`/comments/${commentId}/reply`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: replyText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            location.reload();
+        }
+    });
+}
+
+function generateAutoReply(commentId, commentText) {
+    fetch(`/comments/auto-reply/${commentId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: commentText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.reply) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}
